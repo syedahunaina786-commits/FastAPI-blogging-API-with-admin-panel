@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Admin Dashboard - DevBlog</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <nav class="navbar">
+    <a href="/admin/dashboard" class="brand">DevBlog Admin Panel</a>
+    <div>
+      <span style="color:#94a3b8;">Welcome, {{ user.username }}</span>
+      <a href="/" target="_blank">View Public Site</a>
+      <a href="/docs" target="_blank">Swagger UI</a>
+      <a href="/admin/logout" style="color:#f87171;">Logout</a>
+    </div>
+  </nav>
+
+  <div class="container">
+    <div class="grid-2">
+      <!-- Create Blog Form -->
+      <div class="card">
+        <h2>Publish New Blog Post</h2>
+        <form method="post" action="/admin/blogs/create">
+          <div class="form-group">
+            <label>Blog Title</label>
+            <input type="text" name="title" required placeholder="Getting Started with FastAPI">
+          </div>
+          <div class="form-group">
+            <label>Category</label>
+            <select name="category" required>
+              {% if categories %}
+                {% for cat in categories %}
+                <option value="{{ cat.name }}">{{ cat.name }}</option>
+                {% endfor %}
+              {% else %}
+                <option value="General">General</option>
+                <option value="Technology">Technology</option>
+              {% endif %}
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Tags (comma separated)</label>
+            <input type="text" name="tags" placeholder="python, fastapi, backend">
+          </div>
+          <div class="form-group">
+            <label>Content</label>
+            <textarea name="content" rows="5" required placeholder="Write your article content here..."></textarea>
+          </div>
+          <button type="submit" class="btn">Publish Post</button>
+        </form>
+      </div>
+
+      <!-- Categories Management -->
+      <div class="card">
+        <h2>Manage Categories</h2>
+        <form method="post" action="/admin/categories/create" style="margin-bottom:1.5rem;">
+          <div class="form-group">
+            <label>New Category Name</label>
+            <input type="text" name="name" required placeholder="e.g., Web Development">
+          </div>
+          <div class="form-group">
+            <label>Description (Optional)</label>
+            <input type="text" name="description" placeholder="Articles about backend & APIs">
+          </div>
+          <button type="submit" class="btn">Add Category</button>
+        </form>
+
+        <h3>Existing Categories ({{ categories|length }})</h3>
+        <div style="margin-top:0.75rem;">
+          {% for cat in categories %}
+            <span class="badge" style="margin-bottom:0.4rem;">{{ cat.name }}</span>
+          {% else %}
+            <p class="meta">No custom categories added yet.</p>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+
+    <!-- Manage Blogs Table -->
+    <div class="card">
+      <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem; margin-bottom:1rem;">
+        <h2>Manage All Blogs ({{ blogs|length }})</h2>
+        <form method="get" action="/admin/dashboard" class="search-bar">
+          <input type="text" name="q" placeholder="Search title or tag..." value="{{ search_q }}">
+          <button type="submit" class="btn btn-secondary">Filter</button>
+        </form>
+      </div>
+
+      <table>
+        <thead>
+          <tr>
+            <th>Title</th>
+            <th>Category</th>
+            <th>Tags</th>
+            <th>Author</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for blog in blogs %}
+          <tr>
+            <td><strong>{{ blog.title }}</strong></td>
+            <td><span class="badge">{{ blog.category }}</span></td>
+            <td>
+              {% for t in blog.tags %}
+              <span class="tag">#{{ t }}</span>
+              {% endfor %}
+            </td>
+            <td>{{ blog.author }}</td>
+            <td>
+              <form method="post" action="/admin/blogs/delete/{{ blog.id }}" style="display:inline;">
+                <button type="submit" class="btn btn-danger" onclick="return confirm('Delete this blog post?')">Delete</button>
+              </form>
+            </td>
+          </tr>
+          {% else %}
+          <tr>
+            <td colspan="5" style="text-align:center; color:#64748b;">No blog posts available yet.</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</body>
+</html>

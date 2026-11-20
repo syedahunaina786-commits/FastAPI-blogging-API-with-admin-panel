@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>DevBlog - Blogging Platform</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <nav class="navbar">
+    <a href="/" class="brand">DevBlog API</a>
+    <div>
+      <a href="/">Home</a>
+      <a href="/docs" target="_blank">Swagger Docs</a>
+      <a href="/admin/dashboard">Admin Panel</a>
+    </div>
+  </nav>
+
+  <div class="container">
+    <div class="hero">
+      <h1>Explore Developer Articles</h1>
+      <p>Search articles by title, category, or tags powered by FastAPI & MongoDB.</p>
+      <form class="search-bar" method="get" action="/">
+        <input type="text" name="q" placeholder="Search by title..." value="{{ q }}">
+        <select name="category">
+          <option value="">All Categories</option>
+          {% for cat in categories %}
+          <option value="{{ cat }}" {% if selected_category == cat %}selected{% endif %}>{{ cat }}</option>
+          {% endfor %}
+        </select>
+        <input type="text" name="tag" placeholder="Filter by tag..." value="{{ selected_tag }}">
+        <button type="submit" class="btn">Search</button>
+        {% if q or selected_category or selected_tag %}
+        <a href="/" class="btn btn-secondary">Reset</a>
+        {% endif %}
+      </form>
+    </div>
+
+    {% if blogs %}
+      {% for blog in blogs %}
+      <article class="card">
+        <span class="badge">{{ blog.category }}</span>
+        <h2>{{ blog.title }}</h2>
+        <div class="meta">By <strong>{{ blog.author }}</strong> • {{ blog.created_at.strftime('%Y-%m-%d %H:%M') }}</div>
+        <p style="margin-bottom: 1rem;">{{ blog.content }}</p>
+        <div>
+          {% for t in blog.tags %}
+          <a href="/?tag={{ t }}" class="tag">#{{ t }}</a>
+          {% endfor %}
+        </div>
+      </article>
+      {% endfor %}
+    {% else %}
+      <div class="card">
+        <h3>No blog posts found</h3>
+        <p>Log into the <a href="/admin/login">Admin Panel</a> or use <code>POST /api/blogs</code> in Swagger Docs to publish your first article.</p>
+      </div>
+    {% endif %}
+  </div>
+</body>
+</html>
